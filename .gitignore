@@ -1,0 +1,51 @@
+# --- Root Gitignore for full monorepo ---
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage / tooling
+coverage/
+*.lcov
+.nyc_output/
+
+# Runtime / cache
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+.npm/
+.eslintcache
+.node_repl_history
+
+# Packages
+jspm_packages/
+
+# Env files (do not commit secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Project-specific
+.claude/
