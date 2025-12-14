@@ -1,0 +1,260 @@
+Project: Research Trend Reader – Single-Paper Flow + Multimodal Visualization
+File type: Planning document (.txt)
+
+----------------------------------------
+1. Project Overview
+----------------------------------------
+Goal:
+Build a system that, given a single research paper, (1) summarizes the paper, (2) shows the research flow and context around it, and (3) generates an intuitive multimodal/interactive visualization of the method using Gemini 3’s code generation capabilities.
+
+Long-term vision:
+- Extend from “single paper view” to a daily feed of high-signal papers.
+- Later integrate SNS/news signals and show how they connect to each research flow.
+
+This document focuses on:
+- Phase 1: Single-paper flow engine.
+- How to integrate Gemini 3 for interactive visualization.
+- How Phase 1 will later plug into filtering and SNS extensions.
+
+----------------------------------------
+2. User Story (Phase 1 – Single Paper)
+----------------------------------------
+User:
+- A researcher who wants to quickly understand one paper and its surrounding research flow.
+
+Scenario:
+1) User pastes an arXiv ID, uploads a PDF, or enters a paper title/abstract.
+2) System ingests the paper, finds related work, and constructs a flow/timeline of the field.
+3) System displays:
+   - A concise summary of the paper.
+   - A 3–5-stage research flow (timeline or graph) showing how the field evolved.
+   - The specific novelty and position of this paper in that flow.
+   - A link to an auto-generated interactive visualization (via Gemini 3 code) that helps the user intuitively grasp the method.
+
+----------------------------------------
+3. High-Level Architecture
+----------------------------------------
+Main components:
+1) Paper Ingestion & Parsing
+2) Related-Paper Retrieval
+3) Noise/Importance Scoring (simple version)
+4) Flow Construction (LLM-based)
+5) Visualization Code Generator (Gemini 3)
+6) API & Frontend Integration
+
+Data:
+- Source: arXiv / PDF upload / title+abstract.
+- Embeddings index: vector store of papers in relevant domains (can start from a small curated subset).
+
+LLM backends:
+- LLM A: Text summarization, related work flow construction, novelty explanation.
+- LLM B (Gemini 3): Code generation for interactive visualization (single-code-block web app).
+
+----------------------------------------
+4. Detailed Component Design
+----------------------------------------
+
+4.1 Paper Ingestion & Parsing
+Input:
+- arXiv ID, or
+- PDF file, or
+- title + abstract string
+
+Process:
+1) Fetch metadata (title, authors, year, category, abstract).
+2) If PDF: run PDF parser to extract:
+   - Abstract
+   - Section headings
+   - Method section
+   - Important equations/figures (if possible)
+3) Produce a normalized internal representation:
+   - paper_id
+   - metadata (title, authors, year, venue, category)
+   - abstract_text
+   - method_text
+   - full_text (optional, for retrieval/summarization)
+
+Output:
+- Paper object (JSON) ready for summarization and retrieval.
+
+4.2 Related-Paper Retrieval
+Goal:
+Find “neighbors” (past and future) to build a flow around the target paper.
+
+Process:
+1) Compute embedding for the paper (e.g., using an instruction-tuned embedding model).
+2) Query the vector store for top-k similar papers within the same or related categories.
+3) Filter neighbors:
+   - Remove extremely short or clearly off-topic papers.
+   - Optionally keep only papers within a reasonable year window (e.g., ±7 years).
+
+Output:
+- A list of related papers with metadata and abstracts.
+- These will be the raw candidates for constructing the research flow.
+
+4.3 Noise / Importance Scoring (v0)
+Goal:
+Roughly distinguish “signal” papers from minor or noisy ones.
+
+Signals to use in v0:
+- Content similarity structure:
+  - Prefer papers that are moderately similar (not near-duplicates, not completely unrelated).
+- Basic structure check:
+  - If method_text and experiments sections are reasonably sized → positive.
+- Simple LLM-based quick review:
+  - Prompt the LLM to rate:
+    - Novelty / contribution (1–5)
+    - Clarity of problem definition (1–5)
+    - Experimental support (1–5)
+  - Aggregate into a simple importance score.
+
+Output:
+- Each related paper annotated with:
+  - novelty_score
+  - quality_score
+  - final_signal_score (weighted combination)
+
+The system then:
+- Selects top-N past papers and top-M future papers as “flow anchor points.”
+
+4.4 Research Flow Construction (LLM Prompt)
+Goal:
+Convert the selected anchor papers + target paper into a human-readable research flow.
+
+Input to LLM:
+- Title + abstract of the target paper.
+- Sorted list of anchor papers (with year, title, 1–2 line summary).
+- A small set of guidelines for how to segment the flow.
+
+Prompt template (conceptual):
+- “Given these papers in chronological order, group them into 3–5 stages that describe the evolution of this research direction. For each stage, describe:
+   - Stage name (short).
+   - Years covered.
+   - Main ideas/technical shifts.
+   - Key representative papers.
+  Then explain where the target paper fits into this flow:
+   - Which stage.
+   - What its main novelty is compared to previous stages.
+   - What future directions it suggests.”
+
+Output JSON:
+- field_label (short description of the topic)
+- flow_stages: list of stages (name, years, key_papers, description)
+- paper_position: which stage, and bullet points for novelty
+- Optional: keywords per stage
+
+4.5 Visualization Code Generation with Gemini 3
+Goal:
+Generate a single HTML/JS code block that creates an interactive 2D/3D visualization of the paper’s method and/or research flow, viewable in Chrome.
+
+Usage pattern:
+- After we have text summaries (method explanation + flow), we send a prompt to Gemini 3 for code generation.
+
+Base prompt (given by the user, slightly structured):
+
+“I want to learn about "<paper title>" (see attached pdf in the url). 
+Create beautiful, elegant 3D interactive visuals that explain the internals of the method so that I can understand it intuitively. The app should be light mode, with great graphic design. It should be a single block of code that I can open in Chrome.”
+
+Implementation notes:
+- The backend will:
+  - Provide Gemini 3 with:
+    - Paper title.
+    - Optionally, the extracted method summary.
+    - Optionally, high-level flow information to inspire layout.
+  - Receive a SINGLE code block (HTML + inline JS/CSS).
+  - Save it as a .html file or return it directly for embedding in an iframe.
+
+Frontend UX:
+- In the detailed paper view, show a “Open interactive visualization” button.
+- Clicking opens the Gemini-generated app in a new tab or embedded frame.
+
+Constraints / Guardrails:
+- Request a single-file app (no external assets required if possible).
+- Ask for clear comments in code so that future humans can tweak it.
+
+----------------------------------------
+5. System Flow (End-to-End – Phase 1)
+----------------------------------------
+1) User provides a paper (ID/PDF/title).
+2) Backend ingests, parses, and summarizes core sections.
+3) Backend retrieves related papers from vector store.
+4) Each related paper gets a simple signal score (importance).
+5) Top anchor papers + target paper are passed to LLM A:
+   - Output: flow JSON + novelty explanation.
+6) Backend passes paper title + method summary to Gemini 3 with the visualization prompt:
+   - Output: single-file interactive app code.
+7) Backend returns to frontend:
+   - Summary text
+   - Flow JSON (for timeline/graph rendering)
+   - Novelty bullets
+   - Visualization code (or a URL to open it)
+
+8) Frontend displays:
+   - Text summary
+   - Timeline/graph (e.g., using D3/recharts)
+   - A button to launch the interactive visualization (Gemini app).
+
+----------------------------------------
+6. Future Extensions / Integration Plan
+----------------------------------------
+Phase 2: Paper Filtering & Daily Feed
+- Build a collector for new arXiv/HuggingFace-trending papers.
+- Use a similar novelty/quality scoring mechanism to decide which papers to show.
+- Each paper in the daily feed can reuse the Phase 1 engine when clicked.
+
+Phase 3: SNS / News Integration
+- Crawl or fetch X, YouTube, and tech news.
+- Filter posts for research/technical relevance.
+- Map each item into the same embedding space and link them to specific research flows.
+- Show “related external signals” in the detailed paper view.
+
+Phase 4: Personalization
+- Let users star/rate papers they like.
+- Learn a user-specific weighting over novelty/quality/topic dimensions.
+- Re-rank daily feed and flows based on personal preference.
+
+----------------------------------------
+7. Implementation Order for Developers
+----------------------------------------
+1) Implement Paper Ingestion & Parsing
+   - arXiv/PDF input
+   - normalized Paper object
+
+2) Build a minimal vector store and Related-Paper Retrieval
+   - For Phase 1, small curated corpus is sufficient.
+
+3) Add v0 Noise/Importance Scoring
+   - Simple heuristic + quick LLM rating.
+
+4) Implement Flow Construction (LLM A)
+   - Define exact JSON schema for flow output.
+   - Iterate on prompt until flows look coherent.
+
+5) Integrate Gemini 3 Visualization
+   - Wrap Gemini 3 API call around the visualization prompt.
+   - Ensure the returned code runs as-is in Chrome.
+
+6) Expose an API endpoint
+   - Input: paper identifier
+   - Output: full JSON (summary + flow) + visualization code.
+
+7) Build a simple frontend
+   - Paper input form.
+   - Detailed view with:
+     - Text summary
+     - Flow timeline
+     - “Open interactive visualization” button.
+
+----------------------------------------
+8. Notes for the Implementer
+----------------------------------------
+- Robustness:
+  - Parsing and retrieval will not be perfect at first; start with a small, clean corpus.
+- Cost:
+  - Minimize repeated LLM calls by caching summaries and flow results per paper.
+  - Visualization generation can be on-demand (only when the user clicks the button).
+- Iteration:
+  - The research flow quality heavily depends on the prompt; expect several tuning rounds.
+  - Novelty/importance scoring can initially be very simple, then be replaced by a learned model later.
+
+End of document.

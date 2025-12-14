@@ -1,0 +1,67 @@
+Project: Research Trend Reader – Phase 4
+Multimodal UX & Personalization
+File type: Planning document (.txt)
+
+----------------------------------------
+1. Phase 4 Goal
+----------------------------------------
+Provide an intuitive, elegant research experience and adapt results to individual users.
+
+----------------------------------------
+2. UX Principles
+----------------------------------------
+- Minimal text, strong visuals
+- Research flow first
+- Calm, light-mode design
+
+----------------------------------------
+3. Multimodal Presentation
+----------------------------------------
+- Timeline view
+- Graph view
+- Gemini-generated interactive method visualization
+- Hover-based explanations
+
+----------------------------------------
+4. Personalization
+----------------------------------------
+Signals:
+- Papers clicked
+- Time spent
+- User ratings
+
+Usage:
+- Feed re-ranking
+- Topic preference learning
+- Novelty threshold adaptation
+
+----------------------------------------
+5. User Controls
+----------------------------------------
+- Topic breadth slider
+- Noise tolerance setting
+- Save/star papers
+
+----------------------------------------
+6. Dashboard Views
+----------------------------------------
+- Daily highlights
+- Weekly shifts
+- Active research flows
+
+----------------------------------------
+7. Implementation Order
+----------------------------------------
+1) Build frontend layout
+2) Integrate visualizations
+3) Embed Gemini outputs
+4) Add personalization logic
+
+----------------------------------------
+8. Long-Term Extensions
+----------------------------------------
+- Voice summaries
+- Collaboration
+- Research notes
+
+End of Phase 4

@@ -1,0 +1,79 @@
+Project: Research Trend Reader – Phase 3
+SNS & External Signal Integration
+File type: Planning document (.txt)
+
+----------------------------------------
+1. Phase 3 Goal
+----------------------------------------
+Integrate external signals (SNS, YouTube, News) and connect them to paper-based research flows.
+
+Core objective:
+- Capture early or informal signals.
+- Filter heavy noise.
+- Map signals to existing research topics.
+
+----------------------------------------
+2. Sources
+----------------------------------------
+- X (Twitter):
+  - Selected researcher accounts
+  - Keyword-based search
+- YouTube:
+  - AI research channels
+  - Conference talks
+- Tech News:
+  - RSS feeds (TechCrunch, VentureBeat, etc.)
+
+----------------------------------------
+3. Data Collection
+----------------------------------------
+For each item:
+- text (tweet, title, description)
+- author/channel
+- timestamp
+- engagement (likes, views, retweets)
+
+----------------------------------------
+4. Preprocessing
+----------------------------------------
+- Language normalization
+- Remove promotional patterns
+- Compute embeddings (shared space with papers)
+
+----------------------------------------
+5. Filtering & Signal Detection
+----------------------------------------
+5.1 Noise Filtering
+- Very low engagement
+- Repeated content
+- LLM relevance check
+
+5.2 Signal Scoring
+- Engagement-normalized score
+- Novelty vs recent paper topics
+- Author credibility (optional)
+
+----------------------------------------
+6. Linking to Research Flows
+----------------------------------------
+- Match SNS items to paper clusters / flow stages
+- Output:
+  - Related external signals per paper
+
+----------------------------------------
+7. Outputs
+----------------------------------------
+- External signal cards:
+  - Short summary
+  - Why it matters
+  - Linked paper/flow
+
+----------------------------------------
+8. Implementation Order
+----------------------------------------
+1) Implement one source first
+2) Build filtering pipeline
+3) Embedding-based linking
+4) UI integration
+
+End of Phase 3

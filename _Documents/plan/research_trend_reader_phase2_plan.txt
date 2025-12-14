@@ -1,0 +1,103 @@
+Project: Research Trend Reader – Phase 2
+Paper Discovery & Filtering Engine
+File type: Planning document (.txt)
+
+----------------------------------------
+1. Phase 2 Goal
+----------------------------------------
+Build an automated system that continuously discovers new papers and filters them to produce
+a small, high-signal daily/weekly paper list.
+
+Core objective:
+- Decide WHICH papers are worth clicking.
+- Reuse Phase 1 when a paper is clicked.
+
+----------------------------------------
+2. Scope Definition
+----------------------------------------
+In scope:
+- arXiv (selected categories)
+- HuggingFace Trending Papers
+- OpenReview (optional, later)
+
+Out of scope (for Phase 2):
+- SNS / News (handled in Phase 3)
+- Personalization (Phase 4)
+
+----------------------------------------
+3. Data Collection
+----------------------------------------
+3.1 Sources
+- arXiv API:
+  - Categories: cs.AI, cs.LG, cs.CV, cs.CL, stat.ML (configurable)
+  - Time window: last N days (default: 7)
+- HuggingFace Trending:
+  - Daily snapshot of trending papers
+
+3.2 Collector Design
+- Scheduled job (cron or background worker)
+- For each paper:
+  - paper_id (arXiv ID or HF ID)
+  - title
+  - authors
+  - abstract
+  - categories
+  - date
+
+----------------------------------------
+4. Indexing & Storage
+----------------------------------------
+- Store metadata in relational DB
+- Compute embeddings (title + abstract)
+- Store embeddings in vector DB
+- Deduplicate across sources
+
+----------------------------------------
+5. Filtering & Scoring
+----------------------------------------
+5.1 Noise Filters (Hard Rules)
+- Abstract too short or malformed
+- Obvious spam / survey-only / announcement-only
+- Duplicate or near-duplicate papers
+
+5.2 Novelty & Quality Scoring (Soft)
+Signals:
+- Embedding distance from recent papers
+- Method novelty (LLM quick review)
+- Experimental richness (tables, benchmarks mentioned)
+- Code availability (GitHub link detection)
+
+Scoring:
+- novelty_score (0–1)
+- quality_score (0–1)
+- final_signal_score = weighted sum
+
+----------------------------------------
+6. Daily Paper Selection
+----------------------------------------
+- Rank by final_signal_score
+- Enforce topic diversity (avoid topic collapse)
+- Output:
+  - daily_papers.json (top K papers)
+  - Each paper links to Phase 1 flow engine
+
+----------------------------------------
+7. Outputs
+----------------------------------------
+For frontend:
+- Paper cards:
+  - Title
+  - One-line LLM summary
+  - Signal score
+  - Tags (field labels)
+
+----------------------------------------
+8. Implementation Order
+----------------------------------------
+1) Build collector
+2) Build indexer
+3) Implement hard filters
+4) Add LLM-based soft scoring
+5) Produce daily ranked list
+
+End of Phase 2
