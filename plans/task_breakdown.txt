@@ -1,0 +1,129 @@
+## Step-by-step task breakdown (coding-agent TODOs)
+
+### 0) Repo setup & conventions
+
+* [ ] Create repo + basic README describing MVP scope + non-goals.
+* [ ] Decide stack (suggested for speed): `Next.js` (App Router) + `TypeScript` + simple CSS/Tailwind.
+* [ ] Add `.env` handling for LLM keys (don’t hardcode).
+* [ ] Add basic lint/format (ESLint/Prettier).
+* [ ] Define a minimal folder structure:
+
+  * `src/lib/` (rss parsing, schemas)
+  * `src/server/` (fetch + summarize)
+  * `src/app/` (UI routes)
+
+---
+
+### 1) Data model + schemas (no external calls yet)
+
+* [ ] Define `Paper` type (raw):
+
+  * `id, title, authors, abstract, categories, publishedAt, arxivUrl`
+* [ ] Define `PaperSummary` type (LLM output):
+
+  * `whyRead, motivation, contribution, context`
+* [ ] Define `PaperWithSummary = Paper & { summary?: PaperSummary }`
+* [ ] Add JSON schema validation (optional but helpful): zod.
+* [ ] Add a sample fixture JSON (`fixtures/sample_papers.json`) for UI dev.
+
+**Deliverable:** Types compile; sample data renders (even if fake).
+
+---
+
+### 2) RSS ingestion (arXiv) + last-24h filter
+
+* [ ] Implement RSS fetcher:
+
+  * Input: RSS URL(s) for `cs.LG`, `cs.CV`
+  * Output: list of `Paper`
+* [ ] Parse RSS entries → map to `Paper`
+
+  * Extract: title, link, published date, authors, abstract/summary if present
+  * Generate `id` from arXiv URL
+* [ ] Merge feeds (LG + CV) into one list.
+* [ ] Filter to **last 24 hours** (relative to now).
+* [ ] Sort descending by `publishedAt`.
+* [ ] Add “max items” cap (e.g., 30) after filtering.
+
+**Deliverable:** `getLatestPapers()` returns a clean list of today’s papers.
+
+---
+
+### 3) Summarization pipeline (LLM distillation)
+
+* [ ] Create prompt template that produces **strict JSON** with keys:
+
+  * `whyRead, motivation, contribution, context`
+* [ ] Implement summarizer:
+
+  * Input: `Paper`
+  * Output: `PaperSummary`
+* [ ] Add robust JSON parsing + retries/fallback:
+
+  * If invalid JSON, retry once with “return JSON only” instruction.
+* [ ] Add rate limiting / concurrency control:
+
+  * Summarize N papers with small concurrency (e.g., 3–5).
+* [ ] Add cheap caching (local file cache or KV):
+
+  * Key: `paper.id`
+  * Value: summary + timestamp
+  * Don’t re-summarize if already cached.
+
+**Deliverable:** `summarizePapers(papers)` returns `PaperWithSummary[]`.
+
+---
+
+### 4) Backend endpoints (or server actions)
+
+* [ ] Implement a single “refresh” operation:
+
+  * Fetch RSS → filter → summarize (with cache) → return results
+* [ ] Expose API route:
+
+  * `GET /api/papers?window=24h` (optional)
+  * `POST /api/refresh` (manual refresh trigger)
+* [ ] Ensure no LLM key leaks to client.
+
+**Deliverable:** Hitting refresh returns the latest cards with summaries.
+
+---
+
+### 5) UI v1: Card list page (parallel cards)
+
+* [ ] Build main page: `/`
+* [ ] Show header + “Refresh” button.
+* [ ] Render paper cards (max 20–30):
+
+  * Title
+  * `whyRead` (2–3 lines)
+  * tags: `DL` / `CV` (map from categories)
+  * published time (relative, e.g., “3h ago”)
+* [ ] Loading / error states.
+
+**Deliverable:** Usable dashboard that shows today’s papers + short “why read”.
+
+---
+
+### 6) UI v2: Detail view (on click)
+
+* [ ] Add route: `/paper/[id]` OR modal expansion
+* [ ] Display:
+
+  * Title, authors, published time
+  * Motivation
+  * Contribution
+  * Context
+  * Link to arXiv
+* [ ] Ensure first paragraph is “whyRead” / quick decision.
+
+**Deliverable:** Clicking a card gives a deeper high-level explanation.
+
+---
+
+### 7) Polish + minimal ops
+
+* [ ] Add “last updated at” timestamp in UI.
+* [ ] Add “source: arXiv (cs.LG, cs.CV)” note.
+* [ ] Basic telemetry (optional): count papers fetched/summarized.
+* [ ] README: how to run, env vars, known limitations.

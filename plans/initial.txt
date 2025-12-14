@@ -1,0 +1,209 @@
+좋아. 아래는 **코딩 agent에게 그대로 전달 가능한 하이레벨 기획서**야.
+(의도적으로 **implementation detail은 최소**, scope·interfaces·non-goals는 명확하게)
+
+---
+
+# Project Plan: Research Signal Distillation Dashboard (MVP)
+
+## 1. Project Overview
+
+**Goal**
+Build a lightweight personal web service that helps a PhD researcher quickly understand **today’s (last 24h) Deep Learning / Computer Vision papers**, focusing on **why they matter, what they contribute, and how they fit into the research landscape** — without reading full papers.
+
+This MVP prioritizes **fast comprehension and trend awareness**, not long-term knowledge storage.
+
+---
+
+## 2. Core Problem
+
+* Research information updates too fast (arXiv, conferences).
+* Reading full papers is time-consuming.
+* It is hard to quickly understand:
+
+  * why a paper exists,
+  * what it contributes,
+  * how it relates to ongoing research trends.
+
+---
+
+## 3. Scope (Strict MVP Constraints)
+
+### Included
+
+* **Domain**: Deep Learning, Computer Vision
+* **Source**: Papers only
+* **Time window**: Last 24 hours
+* **Output**: Card-based dashboard + detail view
+* **Primary use**: Decide *what to read* and *understand trends quickly*
+
+### Explicitly Excluded (Non-goals)
+
+* Personalization
+* Saving / bookmarking / note-taking
+* SNS (X, LinkedIn), blogs, GitHub
+* Ranking beyond simple recency
+* Knowledge graph or long-term memory
+* Mathematical derivations or implementation-level explanations
+
+---
+
+## 4. Data Sources
+
+### Primary Source
+
+* **arXiv RSS**
+
+  * Categories:
+
+    * `cs.LG` (Machine Learning)
+    * `cs.CV` (Computer Vision)
+  * Filter by **last 24 hours**
+
+### Rationale
+
+* RSS is stable, easy to implement, and sufficient for MVP
+* arXiv coverage alone is enough to validate the concept
+
+---
+
+## 5. System Architecture (High-Level)
+
+```
+arXiv RSS
+   ↓
+Ingestion (last 24h filter)
+   ↓
+Normalization (paper schema)
+   ↓
+LLM-based Distillation
+   ↓
+UI (Card View → Detail View)
+```
+
+---
+
+## 6. Data Schema (Minimal)
+
+```json
+{
+  "id": "arxiv_id",
+  "title": "string",
+  "authors": ["string"],
+  "abstract": "string",
+  "categories": ["cs.LG", "cs.CV"],
+  "published_at": "timestamp",
+  "arxiv_url": "string"
+}
+```
+
+Derived (LLM-generated):
+
+```json
+{
+  "motivation": "string",
+  "contribution": "string",
+  "context": "string",
+  "why_read": "string"
+}
+```
+
+---
+
+## 7. LLM Distillation Requirements
+
+### Output Requirements (High-level only)
+
+For each paper, generate:
+
+1. **Why this paper exists**
+
+   * What problem or limitation it addresses
+2. **Core contribution**
+
+   * Main idea or novelty (no formulas)
+3. **Research context**
+
+   * How it fits into current DL/CV trends
+4. **Why it is worth reading**
+
+   * Clear value judgment for a researcher
+
+### Style & Tone
+
+* High-level, conceptual
+* Trend- and insight-oriented
+* Optimized for **fast understanding**
+* Avoid excessive technical detail
+
+---
+
+## 8. UI Design
+
+### Card View (Default Page)
+
+Each paper is shown as a card containing:
+
+* Title
+* 2–3 line summary: *“Why this paper is worth attention”*
+* Tags: DL / CV
+* Clickable to expand
+
+Constraints:
+
+* Only papers from last 24h
+* Max ~20–30 cards
+
+---
+
+### Detail View (On Click)
+
+Expanded view (page or modal):
+
+* Motivation / problem statement
+* Core contribution
+* Research context (field-level)
+* Link to original arXiv paper
+
+Priority:
+
+* The **first paragraph must help decide whether to read the paper**
+
+---
+
+## 9. Update Mechanism
+
+* Initial version:
+
+  * Manual **“Refresh”** button
+  * Fetches current RSS feed and recomputes summaries
+* Future extension:
+
+  * Scheduled daily refresh
+  * Real-time updates
+
+---
+
+## 10. Success Criteria
+
+The MVP is successful if:
+
+* The user can understand **today’s research trends in 10–15 minutes**
+* Time spent opening full papers is reduced
+* The system helps quickly identify **which papers matter for ongoing research**
+
+---
+
+## 11. Expected Next Extensions (Not in MVP)
+
+* Personalization (research interests)
+* Topic clustering & timelines
+* SNS signals (X, LinkedIn)
+* Saving / note-taking
+* Long-term research knowledge base
+
+---
+
+If you want, next I can:
+
+* turn this into a **task breakdown for a coding agent (step-by-step TODOs)**, or
+* design the **exact LLM prompt(s)** for the distillation step.

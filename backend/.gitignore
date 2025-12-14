@@ -66,6 +66,9 @@ build
 *.sqlite
 *.db
 
+# Cache data
+data/
+
 # IDE
 .vscode/*
 !.vscode/extensions.json
