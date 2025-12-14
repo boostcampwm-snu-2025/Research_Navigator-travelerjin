@@ -20,6 +20,10 @@ export class LLMService {
     }
   }
 
+  getModel() {
+    return this.model
+  }
+
   async analyzePaper(
     paperId: string,
     title: string,

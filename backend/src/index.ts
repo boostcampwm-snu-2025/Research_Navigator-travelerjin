@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import paperRoutes from './routes/papers.js'
+import signalRoutes from './routes/signals.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { logger } from './utils/logger.js'
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // Routes
 app.use('/api/papers', paperRoutes)
+app.use('/api/signals', signalRoutes)
 
 // Health check
 app.get('/health', (req, res) => {

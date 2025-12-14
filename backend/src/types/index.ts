@@ -42,3 +42,42 @@ export interface LLMResponse {
   keyContributions: string[]
   relevanceScore: number
 }
+
+// External Signal Types (Phase 3)
+export interface ExternalSignal {
+  id: string
+  type: 'twitter' | 'news' | 'youtube' | 'hackernews' | 'stackoverflow' | 'reddit'
+  title: string
+  content: string
+  author: string
+  authorHandle?: string
+  url: string
+  publishedDate: string
+  engagement: EngagementMetrics
+  normalizedScore: number
+  relevanceScore: number
+  relatedPapers?: string[]
+  tags: string[]
+  createdAt: string
+  summary?: SignalSummary
+}
+
+export interface EngagementMetrics {
+  raw: any  // Allow any structure for different platforms
+  normalized: number
+}
+
+export interface SignalSummary {
+  hook: string
+  whyMatters: string
+  relatedToPapers: string[]
+  relevanceScore: number
+}
+
+export interface SignalFilterConfig {
+  minEngagement: number
+  minRelevance: number
+  maxAge: number
+  requireAuthorFollowers: number
+  blockPatterns: string[]
+}
