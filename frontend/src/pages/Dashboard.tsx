@@ -97,7 +97,7 @@ function Dashboard() {
             marginBottom: '8px',
             letterSpacing: '-0.5px'
           }}>
-            Research Signal Dashboard
+            Research Navigator
           </h1>
           <p style={{
             fontSize: '16px',
@@ -105,13 +105,14 @@ function Dashboard() {
             margin: '0',
             fontWeight: '400'
           }}>
-            Deep Learning & Computer Vision Research
+            Today’s Research Landscape
           </p>
         </div>
 
         {/* Tab Navigation */}
         <div style={{
           display: 'flex',
+          alignItems: 'center',
           gap: '12px',
           marginBottom: '24px',
           borderBottom: '2px solid #e9ecef',
@@ -142,7 +143,7 @@ function Dashboard() {
               }
             }}
           >
-            Papers ({papers.length})
+            Research Papers ({papers.length})
           </button>
           <button
             onClick={() => setActiveTab('signals')}
@@ -169,67 +170,49 @@ function Dashboard() {
               }
             }}
           >
-            External Signals ({signals.length})
+            External Feeds ({signals.length})
           </button>
-        </div>
-
-        {/* Controls */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '16px',
-          marginBottom: '30px',
-          padding: '20px',
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-        }}>
+          
+          {/* Refresh Button */}
           <button
             onClick={activeTab === 'papers' ? fetchPapers : fetchSignals}
             disabled={activeTab === 'papers' ? loading : signalsLoading}
+            title={activeTab === 'papers' ? 'Refresh Papers' : 'Refresh Feeds'}
             style={{
-              padding: '12px 24px',
-              backgroundColor: (activeTab === 'papers' ? loading : signalsLoading) ? '#6c757d' : '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
+              marginLeft: 'auto',
+              marginBottom: '-2px',
+              width: '40px',
+              height: '40px',
+              backgroundColor: 'transparent',
+              color: '#007bff',
+              border: '2px solid #007bff',
+              borderRadius: '50%',
               cursor: (activeTab === 'papers' ? loading : signalsLoading) ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              fontWeight: '600',
+              fontSize: '18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0,123,255,0.2)',
-              opacity: (activeTab === 'papers' ? loading : signalsLoading) ? 0.6 : 1
+              opacity: (activeTab === 'papers' ? loading : signalsLoading) ? 0.5 : 1,
+              transform: (activeTab === 'papers' ? loading : signalsLoading) ? 'rotate(360deg)' : 'rotate(0deg)',
             }}
             onMouseEnter={(e) => {
               if (!(activeTab === 'papers' ? loading : signalsLoading)) {
-                e.currentTarget.style.backgroundColor = '#0056b3'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,123,255,0.3)'
+                e.currentTarget.style.backgroundColor = '#007bff'
+                e.currentTarget.style.color = 'white'
+                e.currentTarget.style.transform = 'rotate(180deg)'
               }
             }}
             onMouseLeave={(e) => {
               if (!(activeTab === 'papers' ? loading : signalsLoading)) {
-                e.currentTarget.style.backgroundColor = '#007bff'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,123,255,0.2)'
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = '#007bff'
+                e.currentTarget.style.transform = 'rotate(0deg)'
               }
             }}
           >
-            {activeTab === 'papers'
-              ? (loading ? 'Loading...' : 'Refresh Papers')
-              : (signalsLoading ? 'Loading...' : 'Refresh Signals')
-            }
+            ↻
           </button>
-          {lastUpdated && activeTab === 'papers' && (
-            <span style={{
-              fontSize: '14px',
-              color: '#6c757d'
-            }}>
-              Last updated: {new Date(lastUpdated).toLocaleString()}
-            </span>
-          )}
         </div>
 
         {/* Papers Tab Content */}
@@ -291,7 +274,7 @@ function Dashboard() {
                     color: '#1a1a1a',
                     margin: '0'
                   }}>
-                    Recent Papers (Last 7 Days)
+                    Research Papers (Last 7 Days)
                   </h2>
                   <span style={{
                     fontSize: '14px',
@@ -339,7 +322,7 @@ function Dashboard() {
                 color: '#1a1a1a',
                 margin: '0'
               }}>
-                Feeds (Last 72 Hours)
+                External Feeds (Last 72 Hours)
               </h2>
               {signals.length > 0 && (
                 <span style={{
@@ -373,7 +356,7 @@ function Dashboard() {
                 fontSize: '16px',
                 color: '#6c757d'
               }}>
-                Loading external signals...
+                Loading external feeds...
               </div>
             ) : signals.length === 0 ? (
               <div style={{
@@ -383,7 +366,7 @@ function Dashboard() {
                 borderRadius: '8px',
                 color: '#6c757d'
               }}>
-                No external signals found.
+                No external feeds found.
                 <div style={{ marginTop: '12px', fontSize: '14px' }}>
                   Make sure NEWSAPI_KEY is configured in backend/.env
                 </div>
