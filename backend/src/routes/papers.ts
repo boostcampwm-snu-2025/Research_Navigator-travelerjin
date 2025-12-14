@@ -29,8 +29,8 @@ router.get('/today', async (req: Request, res: Response) => {
   try {
     logger.info('Fetching today\'s papers')
 
-    // Fetch papers from arXiv RSS (last 7 days, limit to 10 papers)
-    const arxivPapers = await arxivService.fetchPapers(7, 10)
+    // Fetch papers from arXiv RSS (last 7 days, limit to 12 papers)
+    const arxivPapers = await arxivService.fetchPapers(7, 12)
 
     if (arxivPapers.length === 0) {
       return res.json({
@@ -91,7 +91,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     const paper = cachedPapers.find((p) => p.id === id || p.arxivId === id)
 
     if (paper) {
-      return res.json(paper)
+      return res.json({ paper })
     }
 
     // If not in cache, return 404

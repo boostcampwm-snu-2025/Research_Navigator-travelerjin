@@ -194,14 +194,20 @@ function Dashboard() {
               </span>
             </div>
 
-            {papers.map((paper, index) => (
-              <PaperCard
-                key={paper.id}
-                paper={paper}
-                index={index}
-                onClick={() => navigate(`/paper/${paper.id}`)}
-              />
-            ))}
+            {/* Grid layout for cards */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '24px',
+            }}>
+              {papers.map((paper) => (
+                <PaperCard
+                  key={paper.id}
+                  paper={paper}
+                  onClick={() => navigate(`/paper/${paper.id}`)}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

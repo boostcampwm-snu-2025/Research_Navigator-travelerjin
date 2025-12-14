@@ -122,19 +122,21 @@ Abstract: ${abstract}
 
 Provide the following analysis:
 
-1. **whyRead** (2-3 sentences): A quick decision-maker - why should a DL/CV researcher read this paper? What makes it interesting or important?
+1. **hook** (1-2 sentences MAX): A compelling, punchy reason to read this paper. Make it intriguing and casual - like you're telling a colleague why they should check this out. Focus on the "wow factor" or the key insight.
 
-2. **motivation** (2-3 sentences): What problem or limitation does this paper address? Why does this paper exist?
+2. **whyRead** (2-3 sentences): A quick decision-maker - why should a DL/CV researcher read this paper? What makes it interesting or important?
 
-3. **contribution** (2-3 sentences): What is the main contribution or novelty? Explain the core idea at a high level, without mathematical details.
+3. **motivation** (2-3 sentences): What problem or limitation does this paper address? Why does this paper exist?
 
-4. **context** (2-3 sentences): How does this fit into the current Deep Learning/Computer Vision research landscape? What trends or areas does it relate to?
+4. **contribution** (2-3 sentences): What is the main contribution or novelty? Explain the core idea at a high level, without mathematical details.
 
-5. **keyContributions** (array of 3-5 strings): List the key technical contributions as bullet points.
+5. **context** (2-3 sentences): How does this fit into the current Deep Learning/Computer Vision research landscape? What trends or areas does it relate to?
 
-6. **relevanceScore** (number 0-1): How relevant is this to current DL/CV research? (0.0 = niche/incremental, 1.0 = breakthrough/highly relevant)
+6. **keyContributions** (array of 3-5 strings): List the key technical contributions as bullet points.
 
-Respond in JSON format with these exact keys: whyRead, motivation, contribution, context, keyContributions (array of strings), relevanceScore (number).${strictInstruction}
+7. **relevanceScore** (number 0-1): How relevant is this to current DL/CV research? (0.0 = niche/incremental, 1.0 = breakthrough/highly relevant)
+
+Respond in JSON format with these exact keys: hook, whyRead, motivation, contribution, context, keyContributions (array of strings), relevanceScore (number).${strictInstruction}
     `.trim()
   }
 
@@ -152,6 +154,7 @@ Respond in JSON format with these exact keys: whyRead, motivation, contribution,
 
     // Validate required fields
     if (
+      !parsed.hook ||
       !parsed.whyRead ||
       !parsed.motivation ||
       !parsed.contribution ||
@@ -163,6 +166,7 @@ Respond in JSON format with these exact keys: whyRead, motivation, contribution,
     }
 
     return {
+      hook: parsed.hook,
       why: parsed.whyRead,
       what: parsed.contribution,
       howItFits: parsed.context,

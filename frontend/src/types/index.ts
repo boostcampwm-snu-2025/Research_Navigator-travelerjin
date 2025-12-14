@@ -11,6 +11,7 @@ export interface Paper {
 }
 
 export interface PaperSummary {
+  hook: string
   why: string
   what: string
   howItFits: string

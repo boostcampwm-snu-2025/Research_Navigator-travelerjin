@@ -13,6 +13,7 @@ export interface Paper {
 }
 
 export interface PaperSummary {
+  hook: string
   why: string
   what: string
   howItFits: string
@@ -33,6 +34,7 @@ export interface ArxivPaper {
 }
 
 export interface LLMResponse {
+  hook: string
   why: string
   what: string
   howItFits: string
