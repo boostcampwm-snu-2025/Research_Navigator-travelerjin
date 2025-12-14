@@ -14,6 +14,7 @@ export interface PaperSummary {
   why: string
   what: string
   howItFits: string
+  motivation: string
   keyContributions: string[]
   relevanceScore: number
 }

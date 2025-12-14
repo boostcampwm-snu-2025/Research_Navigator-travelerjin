@@ -1,26 +1,10 @@
 import { useState, useEffect } from 'react'
-
-interface PaperSummary {
-  why: string
-  what: string
-  howItFits: string
-  motivation: string
-  keyContributions: string[]
-  relevanceScore: number
-}
-
-interface Paper {
-  id: string
-  title: string
-  authors: string[]
-  abstract: string
-  publishedDate: string
-  categories: string[]
-  pdfUrl: string
-  summary?: PaperSummary
-}
+import { useNavigate } from 'react-router-dom'
+import { Paper } from '../types'
+import PaperCard from '../components/PaperCard'
 
 function Dashboard() {
+  const navigate = useNavigate()
   const [papers, setPapers] = useState<Paper[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,156 +36,175 @@ function Dashboard() {
   }, [])
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Research Signal Dashboard</h1>
-      <p>Deep Learning & Computer Vision Papers (Last 7 Days)</p>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f8f9fa',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '40px 20px'
+      }}>
+        {/* Header */}
+        <div style={{ marginBottom: '40px' }}>
+          <h1 style={{
+            fontSize: '36px',
+            fontWeight: 'bold',
+            color: '#1a1a1a',
+            marginTop: '0',
+            marginBottom: '8px',
+            letterSpacing: '-0.5px'
+          }}>
+            Research Signal Dashboard
+          </h1>
+          <p style={{
+            fontSize: '16px',
+            color: '#6c757d',
+            margin: '0',
+            fontWeight: '400'
+          }}>
+            Deep Learning & Computer Vision Papers (Last 7 Days)
+          </p>
+        </div>
 
-      <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-        <button
-          onClick={fetchPapers}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Refresh Papers
-        </button>
-        {lastUpdated && (
-          <span style={{ marginLeft: '15px', color: '#666' }}>
-            Last updated: {new Date(lastUpdated).toLocaleString()}
-          </span>
+        {/* Controls */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px',
+          marginBottom: '30px',
+          padding: '20px',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}>
+          <button
+            onClick={fetchPapers}
+            disabled={loading}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: loading ? '#6c757d' : '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(0,123,255,0.2)',
+              opacity: loading ? 0.6 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = '#0056b3'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,123,255,0.3)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = '#007bff'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,123,255,0.2)'
+              }
+            }}
+          >
+            🔄 {loading ? 'Loading...' : 'Refresh Papers'}
+          </button>
+          {lastUpdated && (
+            <span style={{
+              fontSize: '14px',
+              color: '#6c757d'
+            }}>
+              Last updated: {new Date(lastUpdated).toLocaleString()}
+            </span>
+          )}
+        </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div style={{
+            padding: '40px',
+            textAlign: 'center',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            fontSize: '16px',
+            color: '#6c757d'
+          }}>
+            Loading papers...
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            border: '1px solid #ffc107'
+          }}>
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && papers.length === 0 && (
+          <div style={{
+            padding: '40px',
+            textAlign: 'center',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            color: '#6c757d'
+          }}>
+            No papers found for the last 7 days.
+          </div>
+        )}
+
+        {/* Papers List */}
+        {!loading && papers.length > 0 && (
+          <div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: '#1a1a1a',
+                margin: '0'
+              }}>
+                {papers.length} Recent Papers
+              </h2>
+              <span style={{
+                fontSize: '14px',
+                color: '#6c757d',
+                backgroundColor: '#e9ecef',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                fontWeight: '500'
+              }}>
+                {papers.filter(p => p.summary).length} with AI summaries
+              </span>
+            </div>
+
+            {papers.map((paper, index) => (
+              <PaperCard
+                key={paper.id}
+                paper={paper}
+                index={index}
+                onClick={() => navigate(`/paper/${paper.id}`)}
+              />
+            ))}
+          </div>
         )}
       </div>
-
-      {loading && <div style={{ padding: '20px' }}>Loading papers...</div>}
-
-      {error && (
-        <div style={{
-          padding: '15px',
-          backgroundColor: '#ffebee',
-          color: '#c62828',
-          borderRadius: '4px',
-          marginBottom: '20px'
-        }}>
-          Error: {error}
-        </div>
-      )}
-
-      {!loading && !error && papers.length === 0 && (
-        <div style={{ padding: '20px', color: '#666' }}>
-          No papers found for the last 7 days.
-        </div>
-      )}
-
-      {!loading && papers.length > 0 && (
-        <div>
-          <h2>Found {papers.length} papers</h2>
-
-          {papers.map((paper, index) => (
-            <div
-              key={paper.id}
-              style={{
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                padding: '20px',
-                marginBottom: '20px',
-                backgroundColor: 'white'
-              }}
-            >
-              <div style={{
-                fontSize: '12px',
-                color: '#666',
-                marginBottom: '10px'
-              }}>
-                #{index + 1} | {paper.categories.join(', ')} | {new Date(paper.publishedDate).toLocaleDateString()}
-              </div>
-
-              <h3 style={{
-                marginTop: '0',
-                marginBottom: '10px',
-                fontSize: '18px',
-                fontWeight: 'bold'
-              }}>
-                {paper.title}
-              </h3>
-
-              <div style={{
-                fontSize: '14px',
-                color: '#555',
-                marginBottom: '10px'
-              }}>
-                <strong>Authors:</strong> {paper.authors.join(', ')}
-              </div>
-
-              {paper.summary ? (
-                <div style={{
-                  backgroundColor: '#f0f7ff',
-                  padding: '15px',
-                  borderRadius: '6px',
-                  marginBottom: '15px',
-                  border: '1px solid #d0e7ff'
-                }}>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#0066cc', marginBottom: '8px' }}>
-                    🤖 AI SUMMARY
-                  </div>
-
-                  <div style={{ marginBottom: '10px' }}>
-                    <strong style={{ color: '#0066cc' }}>Why Read:</strong><br />
-                    <span style={{ fontSize: '14px', color: '#333' }}>{paper.summary.why}</span>
-                  </div>
-
-                  <div style={{ marginBottom: '10px' }}>
-                    <strong style={{ color: '#0066cc' }}>Motivation:</strong><br />
-                    <span style={{ fontSize: '14px', color: '#333' }}>{paper.summary.motivation}</span>
-                  </div>
-
-                  <div style={{ marginBottom: '10px' }}>
-                    <strong style={{ color: '#0066cc' }}>Key Contributions:</strong>
-                    <ul style={{ marginTop: '5px', paddingLeft: '20px', fontSize: '14px', color: '#333' }}>
-                      {paper.summary.keyContributions.map((contrib, idx) => (
-                        <li key={idx}>{contrib}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div style={{ fontSize: '12px', color: '#666' }}>
-                    Relevance Score: {(paper.summary.relevanceScore * 100).toFixed(0)}%
-                  </div>
-                </div>
-              ) : (
-                <div style={{
-                  fontSize: '14px',
-                  color: '#333',
-                  lineHeight: '1.6',
-                  marginBottom: '15px'
-                }}>
-                  <strong>Abstract:</strong><br />
-                  {paper.abstract}
-                </div>
-              )}
-
-              <div>
-                <a
-                  href={paper.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: '#007bff',
-                    textDecoration: 'none',
-                    fontSize: '14px'
-                  }}
-                >
-                  View PDF →
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
